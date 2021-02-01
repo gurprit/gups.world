@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <title>gups.world</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://freqdec.github.io/slabText/css/slabtext.css"
+    />
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Oswald:wght@500&display=swap");
+
+      body {
+        width: 100%;
+      }
+
+      img {
+        width: 100%;
+      }
+
+      a {
+        text-decoration: none;
+      }
+
+      blockquote {
+        font-family: "Oswald", "Arial Black", Gadget, sans-serif;
+        text-transform: uppercase;
+        line-height: 1;
+        color: #222;
+        margin: 20px auto;
+        font-size: 22px;
+        max-width: 800px;
+      }
+
+      .tweet {
+        width: 80%;
+        margin: 5% auto;
+      }
+
+      .slabtexted .slabtext {
+        display: -moz-inline-box;
+        display: inline-block;
+        white-space: nowrap;
+      }
+
+      .slabtextinactive .slabtext {
+        display: inline;
+        white-space: normal;
+        font-size: 1em !important;
+        letter-spacing: inherit !important;
+        word-spacing: inherit !important;
+        *letter-spacing: normal !important;
+        *word-spacing: normal !important;
+      }
+
+      .slabtextdone .slabtext {
+        display: block;
+      }
+    </style>
+  </head>
+
+  <body translate="no">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://freqdec.github.io/slabText/js/jquery.slabtext.min.js"></script>
+    <script id="rendered-js">
+      // TweetJS.com - Display your tweets on your website using Javascript alone
+      // Copyright 2019 Infinite Loop Development Ltd - InfiniteLoop.ie
+      // Do not remove this notice.
+
+      TweetJs = {
+        ListTweetsOnUserTimeline: function (screenName, callback) {
+          TweetJs._callApi(
+            {
+              Action: "ListTweetsOnUserTimeline",
+              ScreenName: screenName
+            },
+            callback
+          );
+        },
+        Search: function (query, callback) {
+          TweetJs._callApi(
+            {
+              Action: "Search",
+              Query: query
+            },
+            callback
+          );
+        },
+        _callApi: function (request, callback) {
+          var xhr = new XMLHttpRequest();
+          URL = "https://www.tweetjs.com/API.aspx";
+          xhr.open("POST", URL);
+          xhr.onreadystatechange = function () {
+            if (
+              this.readyState === XMLHttpRequest.DONE &&
+              this.status === 200
+            ) {
+              callback(JSON.parse(xhr.response));
+            }
+          };
+          xhr.send(JSON.stringify(request));
+        }
+      };
+
+      TweetJs.ListTweetsOnUserTimeline("gups", function (data) {
+        //console.log(data);
+        var dataLen = data.length;
+        var html = document.querySelector("html");
+
+        for (var i = 0; i < dataLen; i++) {
+          //looop
+          var tweetcontainer = document.createElement("div");
+          var blockQuote = document.createElement("blockquote");
+          var text = data[i].text;
+          var media = data[i].entities.media;
+
+          var matchs = /\[(.+)\]\((https?:\/\/[^\s]+)(?: "(.+)")?\)|(https?:\/\/[^\s]+)/gi.exec(
+            text
+          );
+          var img = document.createElement("img");
+          var t = document.createTextNode(text);
+          var a = document.createElement("a");
+
+          tweetcontainer.classList.add("tweet");
+
+          if (matchs !== null) {
+            img.src = "";
+            var currentLinkMatch = matchs[0];
+
+            var noLinkText = text.replace(currentLinkMatch, "");
+
+            text = noLinkText;
+            t = document.createTextNode(text);
+            console.log(text);
+            if (media !== undefined) {
+              var mediaURL = media[0].media_url_https;
+              img.src = mediaURL;
+              a.setAttribute("href", media[0].expanded_url);
+            } else {
+              a.setAttribute("href", currentLinkMatch);
+            }
+          }
+
+          tweetcontainer.appendChild(a);
+          blockQuote.appendChild(t);
+
+          a.appendChild(img);
+          a.appendChild(blockQuote);
+
+          html.appendChild(tweetcontainer);
+
+          // Function to slabtext the blockquotes
+          function slabTextHeadlines() {
+            $("blockquote").slabText({
+              // Don't slabtext the headers if the viewport is under 380px
+              viewportBreakpoint: 380
+              //"fontRatio": 1
+            });
+          }
+          slabTextHeadlines();
+        }
+      });
+    </script>
+  </body>
+</html>
